@@ -1,10 +1,12 @@
-# Flywheel-Tuner
+# Elevator-Tuner
 
-RoboRIO program for tuning a flywheel using REV Robotics SparkMax NEO motor(s)
+WORK IN PROGRESS.
 
-A small WPILib project to quickly tune your REV Robotics NEO powered flywheel.
+Based off of the Flywheel-Tuner repo.
 
-If you're using a Cross The Road Electronics (CTRE) motor you should use the CTRE Phoenix Tuner.
+RoboRIO program for tuning an Elevator using Falcon 500 motors
+
+A small WPILib project to quickly tune your Falcon 500 Elevator.
 
 I highly recommend reading [this excellent article](https://trickingrockstothink.com/blog_posts/2019/10/19/tuning_pid.html) on how to tune PIDF for a flywheel. Follow the example in the sidebar to tune an imaginary flywheel.
 
@@ -34,7 +36,7 @@ Importing the shuffleboard config, `shuffleboard_flywheel_tuner.json`, so that t
 4. Adjust the kP value to shorten the time it takes to reach the set point and decrease the error at your set point. Keep increasing it until, the RPM starts to overshoot and oscillate the set point, then back it off. A small amount of overshoot and oscillation is ok.
 5. Next, add a little kI and set the iZone. Once you have the system reasonably tuned with kF and kP, add a small amount of kI. Start very small, like 0.00001 times smaller than your kP. The iZone is the error range within the kI value is used. This should be an error range that your kF and kP tuned system will consistently hit. An iZone in the 200-500 RPM range should be sufficient. 
 6. You probably won't need to adjust kD. Only if after tuning everything else that the system is still overreacting.
-7. Adjust the ramp rate. The ramp rate controls how quickly the set point changes, this is measured in RPM per second. This can prevent 
+7. Adjust the ramp rate. The ramp rate controls how quickly the set point changes, this is measured in RPM per second. This can soften the power ramp up when the setpoint changes, by having the setpoint change at a maximum rate.
 
 **Record your PIDF values!** The values are not saved by this program.
 
