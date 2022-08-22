@@ -42,11 +42,11 @@ public class Robot extends TimedRobot {
   private WPI_TalonFX m_follow_motor = null;
   // TalonFX doesn't use a separate pid controller object
   private TalonFXSensorCollection m_encoder;
-  private boolean m_invert_motor = true;
-  private SlewRateLimiter m_rateLimiter;
-  private double m_rate_RPMpersecond;
+  private boolean m_invert_motor = true;  private double m_rate_RPMpersecond;
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
   public double voltageCompensation = 11.0;
+  public double minPositionCount = 0;
+  public double maxPositionCount = 2048;  // default to one revolution of FalconFX
   SendableChooser <String> mode_chooser = new SendableChooser<>();
 
   final int kPIDLoopIdx = 0;
@@ -73,8 +73,6 @@ public class Robot extends TimedRobot {
     kMinOutput = -1.0;
     maxRPM = 6300;     // free speed of Falcon 500 is listed as 6380
     m_rate_RPMpersecond = 1e10;    // 10 million effectively disables rate limiting
-
-    m_rateLimiter = new SlewRateLimiter(m_rate_RPMpersecond, m_setPoint);
 
     initMotorController(deviceID, m_invert_motor, m_follow_deviceID, m_follow_motor_inverted, canBusName);
 
@@ -209,13 +207,9 @@ public class Robot extends TimedRobot {
       m_motor.configPeakOutputReverse(min, kTimeoutMs);
       kMinOutput = min; kMaxOutput = max;
     }
-    
-    double ramprate = SmartDashboard.getNumber("Ramp Rate (RPM/s)", 0);
-    if (ramprate != m_rate_RPMpersecond) {
-      m_rateLimiter = new SlewRateLimiter(ramprate, m_setPoint);
-      m_rate_RPMpersecond = ramprate;
-      SmartDashboard.putNumber("Ramp Rate (RPM/s)", m_rate_RPMpersecond);
-    }
+
+
+    // TODO: change setpoint from RPM to position
 
     /**
      * PIDController objects are commanded to a set point using the 
@@ -293,17 +287,9 @@ public class Robot extends TimedRobot {
       }
     }
 
-    // Calculate and set new reference RPM
-    double reference_setpoint = m_rateLimiter.calculate(setPoint);
-    if (setPoint == 0) {
-       // when we hit  stop, stop immediately. (safety!)
-      reference_setpoint = 0;
-      m_rateLimiter.reset(0);
-    }
-    
-    m_motor.set(ControlMode.Velocity, reference_setpoint / ticks2RPm);
+    m_motor.set(ControlMode.Velocity, setPoint / ticks2RPm);
 
-    SmartDashboard.putNumber("SetPoint (RPM)", reference_setpoint);  // was m_setpoint
+    SmartDashboard.putNumber("SetPoint (RPM)", setPoint);
     SmartDashboard.putNumber("Velocity (RPM)", rpm);
     // SmartDashboard.putNumber("Total Current (Amp)", m_pd.getTotalCurrent());
     // SmartDashboard.putNumber("Total Power (W)", m_pd.getTotalPower());
